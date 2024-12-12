@@ -1,0 +1,62 @@
+name: CI/CD devops 2024
+on:
+  push:
+    branches:
+      
+main
+dev
+pull_request:
+  branches:
+main
+dev
+
+#jobs
+jobs:
+  test-backend:
+    runs-on: ubuntu-22.04
+    steps:
+      
+uses: actions/checkout@v2.5.0
+name: Set up JDK 17
+    uses: actions/setup-java@v3
+    with:
+      java-version: '17'
+      distribution: 'temurin'
+name: Build and test with Maven
+  run: mvn -B verify sonar:sonar -Dsonar.projectKey=app-big-data-lab1_big-data-devops -Dsonar.organization=app-big-data-lab1 -Dsonar.host.url=https://sonarcloud.io/ -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./simple-api/pom.xml
+
+  build-and-push-docker-image:
+    needs: test-backend
+    runs-on: ubuntu-22.04
+    steps:
+      
+name: Checkout code
+      uses: actions/checkout@v2.5.0
+
+      
+name: Login to DockerHub
+      run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      
+name: Build image and push backend
+      uses: docker/build-push-action@v3
+      with:
+        context: ./simple-api
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-simple-api:latest
+        push: ${{ github.ref == 'refs/heads/main' }}
+
+      
+name: Build image and push database
+      uses: docker/build-push-action@v3
+      with:
+        context: ./database
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
+        push: ${{ github.ref == 'refs/heads/main' }}
+
+      
+name: Build image and push httpd
+      uses: docker/build-push-action@v3
+      with:
+        context: ./http-server 
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
+        push: ${{ github.ref == 'refs/heads/main' }}
