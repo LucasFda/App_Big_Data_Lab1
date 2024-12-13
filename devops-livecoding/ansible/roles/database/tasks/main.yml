@@ -1,0 +1,13 @@
+- name: Run Database container (MySQL)
+  docker_container:
+    name: mysql
+    image: mysql:latest
+    state: started
+    restart_policy: always
+    env:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+    networks:
+      - name: my-network
+    ports:
+      - "3306:3306"

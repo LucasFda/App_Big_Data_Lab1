@@ -1,0 +1,13 @@
+- name: Launch the application container
+  community.docker.docker_container:
+    name: my_app
+    image: nginx:latest
+    state: started
+    restart_policy: always
+    env:
+      APP_ENV: "production"
+      DATABASE_URL: "mysql://root:root_password@my_database/mydb"
+    networks:
+      - name: my-network
+
+

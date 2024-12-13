@@ -5,4 +5,4 @@ all:
   children:
     prod:
       hosts:
-        admin@lucas.fdida.takima.cloud
+        lucas.fdida.takima.cloud
