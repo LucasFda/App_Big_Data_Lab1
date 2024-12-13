@@ -8,6 +8,6 @@
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: mydb
     networks:
-      - name: my-network
+      - name: my_network
     ports:
       - "3306:3306"

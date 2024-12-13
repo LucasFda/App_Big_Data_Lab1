@@ -8,6 +8,6 @@
       APP_ENV: "production"
       DATABASE_URL: "mysql://root:root_password@my_database/mydb"
     networks:
-      - name: my-network
+      - name: my_network
 
 
