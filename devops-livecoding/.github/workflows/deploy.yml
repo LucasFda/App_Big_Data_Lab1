@@ -1,0 +1,47 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - production  # Le workflow se déclenche sur chaque push sur la branche `production`
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # Récupère le code source depuis GitHub
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}  # Ton utilisateur Docker Hub
+          password: ${{ secrets.DOCKER_PASSWORD }}  # Ton mot de passe Docker Hub
+
+      - name: Build Docker images
+        run: |
+          docker build -t luckyluk94/tp-devops-httpd ./tp-devops-httpd
+          docker build -t luckyluk94/tp-devops-database ./tp-devops-database
+          docker build -t luckyluk94/tp-devops-simple-api ./tp-devops-simple-api
+
+      - name: Push Docker images to Docker Hub
+        run: |
+          docker push luckyluk94/tp-devops-httpd
+          docker push luckyluk94/tp-devops-database
+          docker push luckyluk94/tp-devops-simple-api
+
+      - name: SSH into server and deploy
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}  # Ton serveur
+          username: ${{ secrets.SERVER_USERNAME }}  # Le nom d'utilisateur SSH du serveur
+          key: ${{ secrets.SSH_PRIVATE_KEY }}  # La clé privée SSH pour accéder au serveur
+          script: |
+            docker pull luckyluk94/tp-devops-httpd
+            docker pull luckyluk94/tp-devops-database
+            docker pull luckyluk94/tp-devops-simple-api
+            docker-compose up -d  # Démarre les conteneurs avec Docker Compose
